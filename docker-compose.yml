@@ -1,0 +1,44 @@
+# Use postgres/example user/password credentials
+version: '3.8' # Definindo a versão da especificação do Docker Compose utilizada.
+
+services:
+  master: # Definindo o serviço chamado "master".
+    image: postgres:14    # Especificando a imagem Docker a ser usada, que é a imagem oficial do PostgreSQL versão 14.
+    container_name: master-container     # Nomeando o contêiner como "master-container" para identificação.
+    ports:
+      - target: 5432  # Porta no contêiner (porta alvo).
+        published: 5433 # Porta no host em que o contêiner será publicado.
+        protocol: tcp # Protocolo de rede (TCP neste caso).
+        mode: host  # Modo de publicação direta no host.
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - PGDATA=/var/lib/postgresql/data
+          # Definindo variáveis de ambiente, como a senha do PostgreSQL e a localização dos dados.
+    volumes:
+      - ./master:/var/lib/postgresql/data # Mapeando um diretório local ("./master") para o diretório de dados do contêiner.
+      - type: tmpfs
+        target: /dev/shm
+                # Configurando um volume baseado em tmpfs (RAM) no contêiner em /dev/shm
+
+  replication_1:
+    image: postgres:14
+    container_name: replication-container-1
+    ports:
+      - target: 5432
+        published: 5434
+        protocol: tcp
+        mode: local
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./replication:/var/lib/postgresql/data
+      - type: tmpfs
+        target: /dev/shm
+
+
+# docker run -p 5432:5432 -e POSTGRES_PASSWORD=123 -v /home/uanderson/Documentos/postgres:/var/lib/postgresql/data -d postgres
+
+
+# 5432:5432 - PORTA_DO_PC:PORTA_DO_DOCKER
+# -v DIRETORIO_DA_MAQUINA:/var/lib/postgresql/data
